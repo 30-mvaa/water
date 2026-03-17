@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'user';
+export type Role = "admin" | "user";
 
 export interface AuthUser {
   id: string;
@@ -6,6 +6,8 @@ export interface AuthUser {
   password: string;
   role: Role;
   name: string;
+  enabled: boolean;
+  memberId?: string; // linked member (optional, for 'user' role)
 }
 
 // Land/Terrain details for each member
@@ -37,11 +39,11 @@ export interface MonthlyCharge {
 }
 
 // Event types
-export type EventType = 'meeting' | 'work';
+export type EventType = "meeting" | "work";
 
 export const EVENT_TYPE_LABELS: Record<EventType, string> = {
-  meeting: 'Reunión',
-  work: 'Trabajo Comunitario',
+  meeting: "Reunión",
+  work: "Trabajo Comunitario",
 };
 
 export interface CommunityEvent {
@@ -67,12 +69,12 @@ export interface EventAttendance {
 }
 
 // Payment concepts
-export type PaymentConcept = 'monthly' | 'event_fine' | 'other';
+export type PaymentConcept = "monthly" | "event_fine" | "other";
 
 export const CONCEPT_LABELS: Record<PaymentConcept, string> = {
-  monthly: 'Cuota Mensual',
-  event_fine: 'Multa por Inasistencia',
-  other: 'Otro',
+  monthly: "Cuota Mensual",
+  event_fine: "Multa por Inasistencia",
+  other: "Otro",
 };
 
 export interface Payment {

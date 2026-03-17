@@ -1,25 +1,27 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useApp } from '@/lib/app-context';
-import { CONCEPT_LABELS } from '@/lib/types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { PaymentFormDialog } from '@/components/payment-form-dialog';
-import { Plus, Receipt, Search } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import { useApp } from "@/lib/app-context";
+import { CONCEPT_LABELS } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { MonthlyPaymentDialog } from "@/components/monthly-payment-dialog";
+import { FinePaymentDialog } from "@/components/fine-payment-dialog";
+import { Receipt, Search, Calendar, Gavel } from "lucide-react";
+import Link from "next/link";
 
 const CONCEPT_COLORS: Record<string, string> = {
-  monthly: 'bg-blue-100 text-blue-700 border-blue-200',
-  event_fine: 'bg-amber-100 text-amber-700 border-amber-200',
-  other: 'bg-gray-100 text-gray-700 border-gray-200',
+  monthly: "bg-blue-100 text-blue-700 border-blue-200",
+  event_fine: "bg-amber-100 text-amber-700 border-amber-200",
+  other: "bg-gray-100 text-gray-700 border-gray-200",
 };
 
 export default function PaymentsPage() {
   const { payments, isHydrated } = useApp();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [search, setSearch] = useState('');
+  const [monthlyDialogOpen, setMonthlyDialogOpen] = useState(false);
+  const [fineDialogOpen, setFineDialogOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   if (!isHydrated) {
     return (
@@ -30,14 +32,13 @@ export default function PaymentsPage() {
   }
 
   const sortedPayments = [...payments].sort(
-    (a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
   const filtered = sortedPayments.filter(
     (p) =>
       p.memberName.toLowerCase().includes(search.toLowerCase()) ||
-      p.receiptNumber.toLowerCase().includes(search.toLowerCase())
+      p.receiptNumber.toLowerCase().includes(search.toLowerCase()),
   );
 
   const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -49,14 +50,27 @@ export default function PaymentsPage() {
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Pagos</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {payments.length} pago{payments.length !== 1 ? 's' : ''} &middot;{' '}
-            Total recaudado: <span className="font-medium text-green-600">${totalAmount.toFixed(2)}</span>
+            {payments.length} pago{payments.length !== 1 ? "s" : ""} &middot;{" "}
+            Total recaudado:{" "}
+            <span className="font-medium text-green-600">
+              ${totalAmount.toFixed(2)}
+            </span>
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)} className="gap-2 shrink-0">
-          <Plus size={16} aria-hidden="true" />
-          Registrar Pago
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            onClick={() => setMonthlyDialogOpen(true)}
+            className="gap-2"
+          >
+            <Calendar size={15} aria-hidden="true" />
+            Cobrar Cuota Mensual
+          </Button>
+          <Button onClick={() => setFineDialogOpen(true)} className="gap-2">
+            <Gavel size={15} aria-hidden="true" />
+            Cobrar Multa
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -109,8 +123,8 @@ export default function PaymentsPage() {
                   className="px-5 py-12 text-center text-sm text-muted-foreground"
                 >
                   {search
-                    ? 'No se encontraron pagos.'
-                    : 'No hay pagos registrados.'}
+                    ? "No se encontraron pagos."
+                    : "No hay pagos registrados."}
                 </td>
               </tr>
             ) : (
@@ -129,16 +143,16 @@ export default function PaymentsPage() {
                   </td>
                   <td className="px-5 py-3.5 hidden sm:table-cell">
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${CONCEPT_COLORS[payment.concept] || 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${CONCEPT_COLORS[payment.concept] || "bg-gray-100 text-gray-700 border-gray-200"}`}
                     >
                       {CONCEPT_LABELS[payment.concept]}
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-muted-foreground hidden md:table-cell max-w-[150px] truncate">
-                    {payment.description || '-'}
+                    {payment.description || "-"}
                   </td>
                   <td className="px-5 py-3.5 text-muted-foreground hidden md:table-cell">
-                    {new Date(payment.date).toLocaleDateString('es-ES')}
+                    {new Date(payment.date).toLocaleDateString("es-ES")}
                   </td>
                   <td className="px-5 py-3.5 text-right font-semibold text-foreground">
                     ${payment.amount.toFixed(2)}
@@ -159,7 +173,14 @@ export default function PaymentsPage() {
         </table>
       </div>
 
-      <PaymentFormDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <MonthlyPaymentDialog
+        open={monthlyDialogOpen}
+        onOpenChange={setMonthlyDialogOpen}
+      />
+      <FinePaymentDialog
+        open={fineDialogOpen}
+        onOpenChange={setFineDialogOpen}
+      />
     </div>
   );
 }

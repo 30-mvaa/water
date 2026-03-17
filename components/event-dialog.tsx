@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useApp } from '@/lib/app-context';
-import type { CommunityEvent, EventType } from '@/lib/types';
-import { EVENT_TYPE_LABELS } from '@/lib/types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useEffect, useState } from "react";
+import { useApp } from "@/lib/app-context";
+import type { CommunityEvent, EventType } from "@/lib/types";
+import { EVENT_TYPE_LABELS } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 interface EventDialogProps {
   open: boolean;
@@ -36,10 +36,10 @@ interface FormData {
 }
 
 const EMPTY_FORM: FormData = {
-  name: '',
-  type: 'meeting',
-  date: new Date().toISOString().split('T')[0],
-  amount: '',
+  name: "",
+  type: "meeting",
+  date: new Date().toISOString().split("T")[0],
+  amount: "",
 };
 
 export function EventDialog({ open, onOpenChange, event }: EventDialogProps) {
@@ -57,7 +57,7 @@ export function EventDialog({ open, onOpenChange, event }: EventDialogProps) {
               date: event.date,
               amount: String(event.amount),
             }
-          : EMPTY_FORM
+          : EMPTY_FORM,
       );
       setErrors({});
     }
@@ -65,11 +65,11 @@ export function EventDialog({ open, onOpenChange, event }: EventDialogProps) {
 
   const validate = () => {
     const newErrors: Partial<FormData> = {};
-    if (!form.name.trim()) newErrors.name = 'El nombre es obligatorio.';
-    if (!form.date) newErrors.date = 'La fecha es obligatoria.';
-    if (!form.amount.trim()) newErrors.amount = 'El valor es obligatorio.';
-    else if (isNaN(parseFloat(form.amount)) || parseFloat(form.amount) < 0)
-      newErrors.amount = 'Ingresa un número válido.';
+    if (!form.name.trim()) newErrors.name = "El nombre es obligatorio.";
+    if (!form.date) newErrors.date = "La fecha es obligatoria.";
+    if (!form.amount.trim()) newErrors.amount = "El valor es obligatorio.";
+    else if (isNaN(parseFloat(form.amount)) || parseFloat(form.amount) <= 0)
+      newErrors.amount = "Ingresa un monto mayor a $0.00.";
     return newErrors;
   };
 
@@ -105,7 +105,7 @@ export function EventDialog({ open, onOpenChange, event }: EventDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{event ? 'Editar Evento' : 'Crear Evento'}</DialogTitle>
+          <DialogTitle>{event ? "Editar Evento" : "Crear Evento"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-1.5">
@@ -114,7 +114,7 @@ export function EventDialog({ open, onOpenChange, event }: EventDialogProps) {
               id="ev-name"
               placeholder="Reunión mensual, Limpieza de canales..."
               value={form.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+              onChange={(e) => handleChange("name", e.target.value)}
             />
             {errors.name && (
               <p className="text-xs text-destructive">{errors.name}</p>
@@ -125,19 +125,19 @@ export function EventDialog({ open, onOpenChange, event }: EventDialogProps) {
             <Label htmlFor="ev-type">Tipo de Evento *</Label>
             <Select
               value={form.type}
-              onValueChange={(val) => handleChange('type', val as EventType)}
+              onValueChange={(val) => handleChange("type", val as EventType)}
             >
               <SelectTrigger id="ev-type">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(Object.entries(EVENT_TYPE_LABELS) as [EventType, string][]).map(
-                  ([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  )
-                )}
+                {(
+                  Object.entries(EVENT_TYPE_LABELS) as [EventType, string][]
+                ).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -148,7 +148,7 @@ export function EventDialog({ open, onOpenChange, event }: EventDialogProps) {
               id="ev-date"
               type="date"
               value={form.date}
-              onChange={(e) => handleChange('date', e.target.value)}
+              onChange={(e) => handleChange("date", e.target.value)}
             />
             {errors.date && (
               <p className="text-xs text-destructive">{errors.date}</p>
@@ -164,7 +164,7 @@ export function EventDialog({ open, onOpenChange, event }: EventDialogProps) {
               min="0"
               placeholder="25.00"
               value={form.amount}
-              onChange={(e) => handleChange('amount', e.target.value)}
+              onChange={(e) => handleChange("amount", e.target.value)}
             />
             {errors.amount && (
               <p className="text-xs text-destructive">{errors.amount}</p>
@@ -182,7 +182,7 @@ export function EventDialog({ open, onOpenChange, event }: EventDialogProps) {
             >
               Cancelar
             </Button>
-            <Button type="submit">{event ? 'Guardar' : 'Crear'}</Button>
+            <Button type="submit">{event ? "Guardar" : "Crear"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

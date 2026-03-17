@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth Users ───────────────────────────────────────────────────────────────
+model AuthUser {
+  id        String  @id @default(cuid())
+  username  String  @unique
+  password  String
+  name      String
+  role      Role    @default(user)
+  enabled   Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("auth_users")
+}
+
+enum Role {
+  admin
+  user
+}
+
+// ─── Settings ────────────────────────────────────────────────────────────────
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+}
+
+// ─── Members ─────────────────────────────────────────────────────────────────
+model Member {
+  id        String   @id @default(cuid())
+  cedula    String   @unique
+  name      String
+  email     String
+  phone     String
+
+  // Land / Terrain
+  hectares    Float
+  location    String
+  description String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  monthlyCharges MonthlyCharge[]
+  attendances    EventAttendance[]
+  payments       Payment[]
+
+  @@map("members")
+}
+
+// ─── Monthly Charges ─────────────────────────────────────────────────────────
+model MonthlyCharge {
+  id       String  @id @default(cuid())
+  month    String  // YYYY-MM
+  amount   Float
+  paid     Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  paymentId String?
+  payment   Payment? @relation(fields: [paymentId], references: [id])
+
+  @@unique([memberId, month])
+  @@map("monthly_charges")
+}
+
+// ─── Events ──────────────────────────────────────────────────────────────────
+model Event {
+  id     String    @id @default(cuid())
+  name   String
+  type   EventType
+  date   String    // YYYY-MM-DD
+  amount Float     // Fine for non-attendance
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  attendances EventAttendance[]
+
+  @@map("events")
+}
+
+enum EventType {
+  meeting
+  work
+}
+
+// ─── Event Attendance ─────────────────────────────────────────────────────────
+model EventAttendance {
+  id            String  @id @default(cuid())
+  attended      Boolean @default(false)
+  fineGenerated Boolean @default(false)
+  fineAmount    Float   @default(0)
+  finePaid      Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  finePaymentId String?
+  finePayment   Payment? @relation(fields: [finePaymentId], references: [id])
+
+  @@unique([eventId, memberId])
+  @@map("event_attendances")
+}
+
+// ─── Payments ────────────────────────────────────────────────────────────────
+model Payment {
+  id            String        @id @default(cuid())
+  memberName    String
+  concept       PaymentConcept
+  description   String
+  amount        Float
+  date          String        // YYYY-MM-DD
+  receiptNumber String        @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  monthlyCharges MonthlyCharge[]
+  fines          EventAttendance[]
+
+  @@map("payments")
+}
+
+enum PaymentConcept {
+  monthly
+  event_fine
+  other
+}
